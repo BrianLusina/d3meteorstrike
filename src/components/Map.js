@@ -1,13 +1,32 @@
 import React from 'react';
 import * as d3 from 'd3';
 import * as constants from 'constants';
-import * as utils from 'utils';
-import topojson from 'topojson';
+// import * as utils from 'utils';
+import { feature } from 'topojson-client';
+import $ from 'jquery';
 
 /**
  * Map stateless component
  */
 const Map = () => {
+
+    /**
+     * Resize map on window resize
+     * */
+    function sizeChange() {
+        d3.selectAll("g").attr("transform", "scale(" + $("#container").width() / 1900 + ")");
+        $("svg").height($("#container").width() / 2);
+    }
+
+// Tooltip
+    const divTooltip = d3.select('body').append('div')
+        .attr('class', 'tooltip')
+        .style('opacity', 0);
+
+    const projection = d3.geoMercator().translate([780, 360]).scale(300);
+
+    const path = d3.geoPath(projection);
+
 
     /**
      * draws a world map
@@ -16,12 +35,12 @@ const Map = () => {
     function drawWorldMap(map) {
         d3.json(constants.worldMapPts, (json) => {
             map.select("path")
-                .data(topojson.feature(json, json.objects.countries).features)
+                .data(feature(json, json.objects.countries).features)
                 .enter()
                 .append('path')
                 .attr('fill', '#95E1D3')
                 .attr('stroke', '#266D98')
-                .attr('d', utils.path)
+                .attr('d', path)
         })
     }
 
@@ -35,8 +54,6 @@ const Map = () => {
 
         // setting zoom
         const zoom = d3.zoom()
-            .translate([0, 0])
-            .scale(1)
             .scaleExtent([.5, 18])
             .on("zoom", () => {
                 map.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -50,7 +67,7 @@ const Map = () => {
             .attr("fill", "#266D98")
             .call(zoom);
 
-        d3.select(window).on("resize", utils.sizeChange);
+        d3.select(window).on("resize", sizeChange);
 
         // draw our world map
         drawWorldMap(map)
