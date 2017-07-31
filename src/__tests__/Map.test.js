@@ -18,5 +18,4 @@ describe("Map should", () => {
         expect(wrapper.find("div").length).toBe(1);
     });
 
-    // TODO: other test cases
 });

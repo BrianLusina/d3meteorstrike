@@ -13,14 +13,11 @@ export const colors = {};
 export const meteorites = undefined;
 
 export const projection = d3.geoMercator().translate([780,360]).scale(300);
-export const zoom = d3.zoom().translate([0, 0]).scale(1).scaleExtent([.5, 18])
-    .on("zoom", zoomed);
 
 export const path = d3.geoPath(projection);
 
-/**
- * Move and scale map on meteor interaction*/
-export function zoomed(){
-//     map.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-//     meteorites.attr('transform', 'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ')');
+// Resize map on window resize
+function sizeChange() {
+    d3.selectAll("g").attr("transform", "scale(" + $("#container").width()/1900 + ")");
+    $("svg").height($("#container").width()/2);
 }
