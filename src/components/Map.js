@@ -1,8 +1,6 @@
 import React, {Component} from "react";
 import * as d3 from "d3";
-import * as constants from "constants";
-// import * as utils from 'utils';
-import {feature} from "topojson-client";
+import { feature } from "topojson-client"
 
 export default class Map extends Component {
     constructor() {
@@ -11,7 +9,13 @@ export default class Map extends Component {
         this.state = {
             width: window.innerWidth,
             height: window.innerHeight
-        }
+        };
+
+        //export const worldMapPts = "https://d3js.org/world-50m.v1.json";
+        this.worldMapPts = "https://raw.githubusercontent.com/arshdkhn1/map-data-across-globe/master/worldmap.json";
+
+// export const nasaMeteorData = "https://data.nasa.gov/resource/y77d-th95.geojson";
+        this.nasaMeteorData = "https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/meteorite-strike-data.json";
     }
 
     componentDidMount() {
@@ -30,18 +34,17 @@ export default class Map extends Component {
             .attr("class", "tooltip")
             .style("opacity", "0");
 
+        d3.json(this.worldMapPts, (error, world) => {
 
-        d3.json(constants.worldMapPts, (error, world) => {
             svg.selectAll("g")
                 .append("g")
-                .data(feature(world, world.objects.countries).geometries)
-                //.data(topojson.object(world, world.objects.countries).geometries)
+                .data(feature(world, world.objects.countries).features)
                 .enter()
                 .append("path")
                 .attr("class", "land")
                 .attr("d", path);
 
-            d3.json(constants.nasaMeteorData, (error, data) => {
+            d3.json(this.nasaMeteorData, (error, data) => {
                 if (error) {
                     return console.error(error)
                 }
@@ -82,7 +85,6 @@ export default class Map extends Component {
                         return projection(d.geometry.coordinates)[1];
                     });
             });
-
         })
     }
 
