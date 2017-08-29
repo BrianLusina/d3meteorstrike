@@ -1,84 +1,102 @@
-import React from 'react';
-import * as d3 from 'd3';
-import * as constants from 'constants';
+import React, {Component} from "react";
+import * as d3 from "d3";
+import * as constants from "constants";
 // import * as utils from 'utils';
-import { feature } from 'topojson-client';
-import $ from 'jquery';
+import {feature} from "topojson-client";
 
-/**
- * Map stateless component
- */
-const Map = () => {
+export default class Map extends Component {
+    constructor() {
+        super();
 
-    /**
-     * Resize map on window resize
-     * */
-    function sizeChange() {
-        d3.selectAll("g").attr("transform", "scale(" + $("#container").width() / 1900 + ")");
-        $("svg").height($("#container").width() / 2);
+        this.state = {
+            width: window.innerWidth,
+            height: window.innerHeight
+        }
     }
 
-// Tooltip
-    const divTooltip = d3.select('body').append('div')
-        .attr('class', 'tooltip')
-        .style('opacity', 0);
+    componentDidMount() {
+        let projection = d3.geoMercator().scale(120)
+            .translate([this.state.width / 2, this.state.height / 2]);
 
-    const projection = d3.geoMercator().translate([780, 360]).scale(300);
+        let path = d3.geoPath().projection(projection);
 
-    const path = d3.geoPath(projection);
+        let svg = d3.select("#container")
+            .append("svg")
+            .attr("width", this.state.width)
+            .attr("height", this.state.height);
+
+        let div = d3.select("#container")
+            .append("div")
+            .attr("class", "tooltip")
+            .style("opacity", "0");
 
 
-    /**
-     * draws a world map
-     * @param map {Object}
-     * */
-    function drawWorldMap(map) {
-        d3.json(constants.worldMapPts, (json) => {
-            map.select("path")
-                .data(feature(json, json.objects.countries).features)
+        d3.json(constants.worldMapPts, (error, world) => {
+            svg.selectAll("g")
+                .append("g")
+                .data(feature(world, world.objects.countries).geometries)
+                //.data(topojson.object(world, world.objects.countries).geometries)
                 .enter()
-                .append('path')
-                .attr('fill', '#95E1D3')
-                .attr('stroke', '#266D98')
-                .attr('d', path)
+                .append("path")
+                .attr("class", "land")
+                .attr("d", path);
+
+            d3.json(constants.nasaMeteorData, (error, data) => {
+                if (error) {
+                    return console.error(error)
+                }
+
+                // removing all meteorites that doesn't have
+                // position mentioned in json file
+                let modifiedData = data.features.reduce((arr, elem) => {
+                    if (elem.geometry) {
+                        arr.push(elem);
+                    }
+                    return arr;
+                }, []);
+
+                svg.selectAll(".meteor")
+                    .append("g")
+                    .data(modifiedData)
+                    .enter()
+                    .append("circle")
+                    .on("mouseover", (d) => {
+                        div.transition()
+                            .duration(200)
+                            .style("opacity", 1);
+                        div.html('<span class="name"><span>Name:</span> ' + d.properties.name + '</span><span class="mass"><span>Mass:</span> ' + d.properties.mass + ' units</span><span class="year"><span>Date:</span> ' + Map.getDate(d.properties.year) + '</span><span class="fall"><span>Fall:</span> ' + d.properties.fall + '</span>')
+                            .style("left", (((-d3.event.pageX + window.innerWidth) > window.innerWidth / 2) ? d3.event.pageX + 10 : d3.event.pageX - 240 ) + "px")
+                            .style("top", (d3.event.pageY - 60) + "px");
+                    }).on("mouseout", (d) => {
+                    div.transition()
+                        .duration(200).style("opacity", 0);
+                })
+                    .attr("class", "meteor")
+                    .attr("r", function (d) {
+                        return Math.sqrt((d.properties.mass) * .0001)
+                    })
+                    .attr("cx", function (d) {
+                        return projection(d.geometry.coordinates)[0];
+                    })
+                    .attr("cy", function (d) {
+                        return projection(d.geometry.coordinates)[1];
+                    });
+            });
+
         })
     }
 
-    /**
-     * Generates world map
-     * */
-    function generateMeteorStrike() {
-        let svg = d3.select("#container").append("svg").attr("width", "100%");
-        let map = svg.append("g");
-        let meteorites;
-
-        // setting zoom
-        const zoom = d3.zoom()
-            .scaleExtent([.5, 18])
-            .on("zoom", () => {
-                map.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-                meteorites.attr('transform', 'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ')');
-            });
-
-        // setting background color
-        svg.append("rect")
-            .attr("width", constants.width)
-            .attr("height", constants.height)
-            .attr("fill", "#266D98")
-            .call(zoom);
-
-        d3.select(window).on("resize", sizeChange);
-
-        // draw our world map
-        drawWorldMap(map)
+    static getDate(str) {
+        let date = new Date(str);
+        return date.toUTCString().substr(0, date.toUTCString().length - 13);
     }
 
-    return (
-        <div id="container">
-            {generateMeteorStrike()}
-        </div>
-    );
-};
+    render() {
+        return (
+            <div id="container">
 
+            </div>
+        )
+    }
 
-export default Map;
+}
