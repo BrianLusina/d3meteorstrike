@@ -7,7 +7,7 @@
     "jquery": "^3.5.1",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
-    "react-scripts": "1.0.10",
+    "react-scripts": "2.0.0",
     "topojson": "^3.0.2",
     "topojson-client": "^3.0.0"
   },
