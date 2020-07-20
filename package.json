@@ -7,18 +7,22 @@
     "jquery": "^3.5.1",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
-    "react-scripts": "2.0.0",
+    "react-scripts": "3.3.0",
     "topojson": "^3.0.2",
-    "topojson-client": "^3.0.0"
+    "topojson-client": "^3.0.0",
+    "snyk": "^1.362.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "snyk-protect": "snyk protect",
+    "prepare": "yarn run snyk-protect"
   },
   "devDependencies": {
     "enzyme": "^2.9.1",
     "expect": "^1.20.2"
-  }
+  },
+  "snyk": true
 }
