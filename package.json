@@ -10,7 +10,7 @@
     "react-scripts": "3.3.0",
     "topojson": "^3.0.2",
     "topojson-client": "^3.0.0",
-    "snyk": "^1.366.2"
+    "snyk": "^1.369.2"
   },
   "scripts": {
     "start": "react-scripts start",
