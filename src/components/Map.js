@@ -95,9 +95,7 @@ export default class Map extends Component {
 
     render() {
         return (
-            <div id="container">
-
-            </div>
+            <div id="container"/>
         )
     }
 
